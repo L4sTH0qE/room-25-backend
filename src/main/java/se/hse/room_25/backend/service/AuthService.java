@@ -26,6 +26,7 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
 
+    /// Initialise necessary Spring beans.
     @Autowired
     public void prepare(ClientRepository clientRepository, SessionRepository sessionRepository,
                         PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
@@ -38,13 +39,11 @@ public class AuthService {
     }
 
 
-    /**
-     * Creates a new user.
-     *
-     * @param authDTO DTO object containing registration data.
-     * @throws Exception if a user with the same username already exists.
-     * @return Message about registration success.
-     */
+    /// Register new client.
+    ///
+    /// @param authDTO DTO object containing registration data.
+    /// @throws Exception if a client with the same username already exists.
+    /// @return Message about registration success.
     public synchronized String register(AuthDTO authDTO) throws Exception {
 
         if (clientRepository.findByUsername(authDTO.username()).isPresent()) {
@@ -57,13 +56,11 @@ public class AuthService {
         return "user registered successfully";
     }
 
-    /**
-     * Performs user login.
-     *
-     * @param authDTO DTO object containing login data.
-     * @throws Exception if no user was found with given username or password is incorrect.
-     * @return token to authorize with.
-     */
+    /// Login existing client.
+    ///
+    /// @param authDTO DTO object containing login data.
+    /// @throws Exception if no client was found with given username or password is incorrect.
+    /// @return token to authorize with.
     public String login(AuthDTO authDTO) throws Exception {
 
         Optional<Client> client = clientRepository.findByUsername(authDTO.username());
@@ -86,6 +83,11 @@ public class AuthService {
         return token;
     }
 
+    /// Retrieve a client info by session token.
+    ///
+    /// @param token The token of the client's session.
+    /// @throws Exception if no client was found with given token.
+    /// @return The String object representing the client.
     public String getClientByToken(String token) throws Exception {
 
         // Get the session by the JWT token
@@ -104,16 +106,5 @@ public class AuthService {
         Client client = session.get().getClient();
 
         return "{\"id\":\"" + client.getId() + "\",\n\"username\":\"" + client.getUsername() + "\",\n\"password\":\"" + client.getPassword() + "\"}";
-    }
-
-    /**
-     * Retrieves a client object by their username.
-     *
-     * @param username The username of the client.
-     * @return The Client object if found, or null if not found.
-     */
-    public Client getClientByUsername(String username) {
-        Optional<Client> client = clientRepository.findByUsername(username);
-        return client.orElse(null);
     }
 }

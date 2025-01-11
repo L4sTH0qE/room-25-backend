@@ -15,17 +15,16 @@ public class AuthController {
 
     private AuthService authService;
 
+    /// Initialise necessary Spring beans.
     @Autowired
     public void prepare(AuthService authService) {
         this.authService = authService;
     }
 
-    /**
-     * Endpoint for user login.
-     *
-     * @param authDTO DTO object containing login data.
-     * @return ResponseEntity containing the login response.
-     */
+    /// Endpoint for user login.
+    ///
+    /// @param authDTO DTO object containing login data.
+    /// @return ResponseEntity containing the login response.
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid AuthDTO authDTO, BindingResult result) {
 
@@ -41,12 +40,10 @@ public class AuthController {
         }
     }
 
-    /**
-     * Endpoint for user registration.
-     *
-     * @param authDTO DTO object containing registration data.
-     * @return ResponseEntity containing the registration response.
-     */
+    /// Endpoint for user registration.
+    ///
+    /// @param authDTO DTO object containing registration data.
+    /// @return ResponseEntity containing the registration response.
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid AuthDTO authDTO, BindingResult result) {
 
@@ -62,6 +59,10 @@ public class AuthController {
         }
     }
 
+    /// Endpoint for getting user info by token.
+    ///
+    /// @param authHeader 'Authorization' header value (e.g. 'Bearer 1234').
+    /// @return ResponseEntity containing user info.
     @GetMapping("/get")
     public ResponseEntity<String> getClientByToken(@RequestHeader("Authorization") String authHeader) {
 

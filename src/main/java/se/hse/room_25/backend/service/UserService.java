@@ -19,6 +19,7 @@ public class UserService implements UserDetailsService {
 
     ClientRepository clientRepository;
 
+    /// Initialise necessary Spring beans.
     @Autowired
     public void prepare(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
