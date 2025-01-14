@@ -27,7 +27,11 @@ public class JwtService {
     }
 
     public boolean isValid(String token) {
-        return !extractAllClaims(token).getExpiration().before(new Date(System.currentTimeMillis()));
+        try {
+            return !extractAllClaims(token).getExpiration().before(new Date(System.currentTimeMillis()));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String generateToken(Authentication authentication) {

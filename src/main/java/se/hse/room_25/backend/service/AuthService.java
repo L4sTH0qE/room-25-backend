@@ -7,7 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import se.hse.room_25.backend.dto.AuthDTO;
+import se.hse.room_25.backend.dto.AuthDto;
 import se.hse.room_25.backend.entity.Client;
 import se.hse.room_25.backend.entity.Session;
 import se.hse.room_25.backend.repository.ClientRepository;
@@ -44,7 +44,7 @@ public class AuthService {
     /// @param authDTO DTO object containing registration data.
     /// @throws Exception if a client with the same username already exists.
     /// @return Message about registration success.
-    public synchronized String register(AuthDTO authDTO) throws Exception {
+    public synchronized String register(AuthDto authDTO) throws Exception {
 
         if (clientRepository.findByUsername(authDTO.username()).isPresent()) {
             throw new Exception("username is already in use");
@@ -61,7 +61,7 @@ public class AuthService {
     /// @param authDTO DTO object containing login data.
     /// @throws Exception if no client was found with given username or password is incorrect.
     /// @return token to authorize with.
-    public String login(AuthDTO authDTO) throws Exception {
+    public String login(AuthDto authDTO) throws Exception {
 
         Optional<Client> client = clientRepository.findByUsername(authDTO.username());
 

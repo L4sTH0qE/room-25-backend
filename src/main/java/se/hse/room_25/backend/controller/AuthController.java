@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import se.hse.room_25.backend.dto.AuthDTO;
+import se.hse.room_25.backend.dto.AuthDto;
 import se.hse.room_25.backend.service.AuthService;
 
 @RestController
@@ -26,7 +26,7 @@ public class AuthController {
     /// @param authDTO DTO object containing login data.
     /// @return ResponseEntity containing the login response.
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid AuthDTO authDTO, BindingResult result) {
+    public ResponseEntity<String> login(@RequestBody @Valid AuthDto authDTO, BindingResult result) {
 
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("{\"error\":\"invalid username or password\"}");
@@ -45,7 +45,7 @@ public class AuthController {
     /// @param authDTO DTO object containing registration data.
     /// @return ResponseEntity containing the registration response.
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid AuthDTO authDTO, BindingResult result) {
+    public ResponseEntity<String> register(@RequestBody @Valid AuthDto authDTO, BindingResult result) {
 
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("{\"error\":\"invalid username or password\"}");

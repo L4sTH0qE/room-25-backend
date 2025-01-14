@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.google.code.gson:gson")
     implementation("io.jsonwebtoken:jjwt:0.12.6")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -31,7 +32,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework:spring-messaging")
-    //implementation("org.liquibase:liquibase-core")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
