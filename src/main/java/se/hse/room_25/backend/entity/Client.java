@@ -3,12 +3,11 @@ package se.hse.room_25.backend.entity;
 import jakarta.persistence.*;
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "client", schema = "public") // table 'user' is not allowed in postgresql
+@Table(name = "client", schema = "public")
 public class Client {
 
     @Id

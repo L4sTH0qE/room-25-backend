@@ -1,5 +1,6 @@
 package se.hse.room_25.backend.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import se.hse.room_25.backend.service.JwtService;
 
 @Configuration
@@ -32,12 +31,21 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)
             .cors(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**")
+                .requestMatchers( "/auth/**", "/error", "/portfolio/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
 
+        http.exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    System.out.println("Unauthorized access attempt: " + request.getRequestURI());
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    System.out.println("Access denied for user: " + request.getUserPrincipal().getName());
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                });
         return http.build();
     }
 
@@ -49,19 +57,5 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // Замените на ваш фронтенд
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
-            }
-        };
     }
 }
