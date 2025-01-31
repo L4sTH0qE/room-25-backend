@@ -83,7 +83,7 @@ public class RoomController {
         }
     }
 
-    @MessageMapping("/room/join/{roomId}")
+    @MessageMapping("/join/{roomId}")
     @SendTo("/topic/room/{roomId}")
     public ResponseEntity<String> joinRoomByToken(@DestinationVariable UUID roomId, @RequestHeader("Authorization") String authHeader, @RequestBody String character) {
         try {
