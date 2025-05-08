@@ -6,8 +6,8 @@ public enum CellType {
     KEY_ROOM,
 
     EMPTY_ROOM,
-    //TWIN_ROOM,
-    //MOVING_ROOM,
+    TUNNEL_ROOM,
+    MOVING_ROOM,
     OBSERVATION_ROOM,
     CONTROL_ROOM,
 
@@ -22,5 +22,4 @@ public enum CellType {
     ACID_ROOM,
     TORTURE_ROOM,
     DEATH_ROOM,
-    //ILLUSION_ROOM,
 }
