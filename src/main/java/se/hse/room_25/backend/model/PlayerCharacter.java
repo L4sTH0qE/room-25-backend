@@ -9,9 +9,7 @@ public enum PlayerCharacter {
     MAX("max"),
     EMMETT("emmett"),
     ALICE("alice"),
-    JENNIFER("jennifer"),
-    SARAH("sarah"),
-    BRUCE("bruce");
+    JENNIFER("jennifer");
 
     private final String name;
 

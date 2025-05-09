@@ -29,14 +29,14 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody @Valid AuthDto authDTO, BindingResult result) {
 
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body("{\"error\":\"invalid username or password\"}");
+            return ResponseEntity.badRequest().body("{\"error\":\"неверный логин или пароль\"}");
         }
 
         try {
             String token = authService.login(authDTO);
             return ResponseEntity.ok("{\"token\":\"" + token + "\"}");
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage() + "\"}");
+            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -48,14 +48,14 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody @Valid AuthDto authDTO, BindingResult result) {
 
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body("{\"error\":\"invalid username or password\"}");
+            return ResponseEntity.badRequest().body("{\"error\":\"неверный логин или пароль\"}");
         }
 
         try {
             String message = authService.register(authDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body("{\"message\":\"" + message + "\"}");
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage() + "\"}");
+            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -67,7 +67,7 @@ public class AuthController {
     public ResponseEntity<String> getClientByToken(@RequestHeader("Authorization") String authHeader) {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"error\":\"" + "invalid header" + "\"}");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"error\":\"" + "неверный заголовок" + "\"}");
         }
         String token = authHeader.substring(7);
 
@@ -75,7 +75,7 @@ public class AuthController {
             String result = authService.getClientByToken(token);
             return ResponseEntity.ok(result);
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage() + "\"}");
+            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 }

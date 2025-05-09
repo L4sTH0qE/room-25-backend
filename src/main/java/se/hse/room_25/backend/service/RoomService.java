@@ -5,7 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import se.hse.room_25.backend.dto.GameDto;
+import se.hse.room_25.backend.dto.LobbyCreateDto;
+import se.hse.room_25.backend.dto.LobbyJoinDto;
 import se.hse.room_25.backend.entity.Client;
 import se.hse.room_25.backend.entity.Room;
 import se.hse.room_25.backend.model.Game;
@@ -42,16 +43,57 @@ public class RoomService {
 
         Optional<Room> room = roomRepository.findById(roomId);
         if (room.isEmpty()) {
-            throw new Exception("room with id \"" + roomId + "\" is not found");
+            throw new Exception("комната \"" + roomId + "\" не найдена");
         }
         return room.get();
+    }
+
+    /// Check room by id
+    public Map<String, Object> checkRoom(UUID roomId, String token) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+
+        if (roomOpt.isEmpty()) {
+            result.put("exists", false);
+            result.put("status", "notFound");
+            result.put("characters", Collections.emptyList());
+            result.put("already_joined", false);
+            return result;
+        }
+
+        Room room = roomOpt.get();
+        result.put("exists", true);
+        result.put("status", room.getStatus());
+        try {
+            result.put("characters", getAvailableCharacters(roomId));
+        } catch (Exception e) {
+            result.put("characters", Collections.emptyList());
+        }
+
+        String clientJson = authService.getClientByToken(token);
+        Type clientType = new TypeToken<Client>() {
+        }.getType();
+        Client client = new Gson().fromJson(clientJson, clientType);
+        String playersJson = room.getPlayers();
+        Type playerListType = new TypeToken<List<Player>>() {
+        }.getType();
+        List<Player> players = new Gson().fromJson(playersJson, playerListType);
+
+        for (Player player : players) {
+            if (player.getClientId().equals(client.getId())) {
+                result.put("already_joined", true);
+                return result;
+            }
+        }
+        result.put("already_joined", false);
+        return result;
     }
 
     /// Get all characters
     public List<String> getAllCharacters() {
 
         List<String> characters = new ArrayList<>();
-        for (PlayerCharacter character: PlayerCharacter.values()) {
+        for (PlayerCharacter character : PlayerCharacter.values()) {
             characters.add(character.getName());
         }
         return characters;
@@ -62,23 +104,25 @@ public class RoomService {
         Room room = getRoom(roomId);
         String playersJson = room.getPlayers();
 
-        Type playerListType = new TypeToken<List<Player>>(){}.getType();
+        Type playerListType = new TypeToken<List<Player>>() {
+        }.getType();
         List<Player> players = new Gson().fromJson(playersJson, playerListType);
 
         List<String> characters = getAllCharacters();
-        for (Player player: players) {
+        for (Player player : players) {
             characters.remove(player.getCharacter().getName());
         }
         return characters;
     }
 
     /// Returns room id.
-    public String createRoom(GameDto gameDto, String token) throws Exception {
+    public String createRoom(LobbyCreateDto lobbyCreateDto, String token) throws Exception {
         String clientJson = authService.getClientByToken(token);
-        Type clientType = new TypeToken<Client>(){}.getType();
-        Client client =  new Gson().fromJson(clientJson, clientType);
+        Type clientType = new TypeToken<Client>() {
+        }.getType();
+        Client client = new Gson().fromJson(clientJson, clientType);
 
-        Player player = new Player(client.getId(), PlayerCharacter.fromString(gameDto.character()));
+        Player player = new Player(client.getId(), PlayerCharacter.fromString(lobbyCreateDto.character()));
         List<Player> players = new ArrayList<>();
         players.add(player);
         String playersJson = new Gson().toJson(players);
@@ -88,45 +132,47 @@ public class RoomService {
         UUID roomId = UUID.randomUUID();
         roomIdToGame.put(roomId, game);
 
-        Room room = new Room(gameDto.numberOfPlayers(), playersJson, board, 10, 1, 1, -1);
+        Room room = new Room(lobbyCreateDto.numberOfPlayers(), playersJson, board, 10, 1, 1, -1);
         room.setId(roomId);
         roomRepository.save(room);
 
         return roomId.toString();
     }
 
-    public synchronized String joinRoom(UUID roomId, String character, String token) throws Exception {
-
+    public synchronized String joinRoom(UUID roomId, LobbyJoinDto lobbyJoinDto, String token) throws Exception {
         List<String> characters = getAllCharacters();
-        if (!characters.contains(character)) {
-            throw new Exception("character \"" + character + "\" is not available");
+        if (!characters.contains(lobbyJoinDto.character())) {
+            throw new Exception("персонаж \"" + lobbyJoinDto.character() + "\" не доступен");
         }
 
         List<String> availableCharacters = getAvailableCharacters(roomId);
-        if (!availableCharacters.contains(character)) {
-            throw new Exception("character is already picked in room \"" + roomId + "\"");
+        if (!availableCharacters.contains(lobbyJoinDto.character())) {
+            throw new Exception("персонаж уже выбран в комнате \"" + roomId + "\"");
         }
 
         String clientJson = authService.getClientByToken(token);
-        Type clientType = new TypeToken<Client>(){}.getType();
-        Client client =  new Gson().fromJson(clientJson, clientType);
+        Type clientType = new TypeToken<Client>() {
+        }.getType();
+        Client client = new Gson().fromJson(clientJson, clientType);
 
         Room room = getRoom(roomId);
         String playersJson = room.getPlayers();
-        Type playerListType = new TypeToken<List<Player>>(){}.getType();
+        Type playerListType = new TypeToken<List<Player>>() {
+        }.getType();
         List<Player> players = new Gson().fromJson(playersJson, playerListType);
 
-        for (Player player: players) {
-            if (player.getClientId() == client.getId()) {
-                throw new Exception("player has already joined room \"" + roomId + "\"");
+        for (Player player : players) {
+            if (player.getClientId().equals(client.getId())) {
+                throw new Exception("вы уже присоединились к комнате \"" + roomId + "\"");
             }
         }
-        Player newPlayer = new Player(client.getId(), PlayerCharacter.fromString(character));
+        Player newPlayer = new Player(client.getId(), PlayerCharacter.fromString(lobbyJoinDto.character()));
         players.add(newPlayer);
-        room.setNumberOfPlayers(room.getNumberOfPlayers() + 1);
         room.setPlayers(new Gson().toJson(players));
+        if (players.size() == room.getNumberOfPlayers()) {
+            room.setStatus("started");
+        }
         roomRepository.save(room);
-        // ADD STATUS UPDATE WHEN ALL JOINED!!!
-        return "OK";
+        return roomId.toString();
     }
 }

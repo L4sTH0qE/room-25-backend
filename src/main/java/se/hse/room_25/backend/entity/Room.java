@@ -1,6 +1,9 @@
 package se.hse.room_25.backend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -17,6 +20,7 @@ public class Room {
 
     int numberOfPlayers;
 
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String players;
 
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)

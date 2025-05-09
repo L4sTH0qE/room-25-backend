@@ -30,7 +30,7 @@ public class UserService implements UserDetailsService {
 
         Optional<Client> client = clientRepository.findByUsername(username);
         if (client.isEmpty()) {
-            throw new UsernameNotFoundException("invalid username");
+            throw new UsernameNotFoundException("неверный логин");
         }
 
         List<GrantedAuthority> authorities = new ArrayList<>();

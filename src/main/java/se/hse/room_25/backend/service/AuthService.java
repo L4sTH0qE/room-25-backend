@@ -42,34 +42,34 @@ public class AuthService {
     /// Register new client.
     ///
     /// @param authDTO DTO object containing registration data.
-    /// @throws Exception if a client with the same username already exists.
     /// @return Message about registration success.
+    /// @throws Exception if a client with the same username already exists.
     public synchronized String register(AuthDto authDTO) throws Exception {
 
         if (clientRepository.findByUsername(authDTO.username()).isPresent()) {
-            throw new Exception("username is already in use");
+            throw new Exception("логин занят");
         }
 
         Client client = new Client(authDTO.username(), passwordEncoder.encode(authDTO.password()));
         clientRepository.save(client);
 
-        return "user registered successfully";
+        return "регистрация прошла успешно";
     }
 
     /// Login existing client.
     ///
     /// @param authDTO DTO object containing login data.
-    /// @throws Exception if no client was found with given username or password is incorrect.
     /// @return token to authorize with.
+    /// @throws Exception if no client was found with given username or password is incorrect.
     public String login(AuthDto authDTO) throws Exception {
 
         Optional<Client> client = clientRepository.findByUsername(authDTO.username());
 
         if (client.isEmpty()) {
-            throw new Exception("no user found with such username");
+            throw new Exception("пользователь с таким логином не найден");
         }
         if (!passwordEncoder.matches(authDTO.password(), client.get().getPassword())) {
-            throw new Exception("password is incorrect");
+            throw new Exception("неверный пароль");
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -86,20 +86,20 @@ public class AuthService {
     /// Retrieve a client info by session token.
     ///
     /// @param token The token of the client's session.
-    /// @throws Exception if no client was found with given token.
     /// @return The String object representing the client.
+    /// @throws Exception if no client was found with given token.
     public String getClientByToken(String token) throws Exception {
 
         // Get the session by the JWT token
         Optional<Session> session = sessionRepository.findByToken(token);
 
         if (session.isEmpty()) {
-            throw new Exception("invalid token");
+            throw new Exception("неверный токен");
         }
 
         // Validate and parse the JWT token
         if (!jwtService.isValid(token)) {
-            throw new Exception("expired token");
+            throw new Exception("просроченный токен");
         }
 
         // Get the client
