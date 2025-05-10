@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import se.hse.room_25.backend.dto.LobbyCreateDto;
@@ -23,12 +22,9 @@ public class RoomController {
 
     private RoomService roomService;
 
-    private SimpMessagingTemplate messagingTemplate;
-
     @Autowired
-    public void prepare(RoomService roomService, SimpMessagingTemplate messagingTemplate) {
+    public void prepare(RoomService roomService) {
         this.roomService = roomService;
-        this.messagingTemplate = messagingTemplate;
     }
 
     @GetMapping("/characters")
@@ -66,16 +62,6 @@ public class RoomController {
         }
     }
 
-    @GetMapping("/{roomId}")
-    public ResponseEntity<String> getRoom(@PathVariable UUID roomId) {
-        try {
-            Room room = roomService.getRoom(roomId);
-            return ResponseEntity.ok(new Gson().toJson(room));
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage().replace("\"", "\\\"") + "\"}");
-        }
-    }
-
     @GetMapping("/check/{roomId}")
     public ResponseEntity<String> checkRoom(@PathVariable UUID roomId, @RequestHeader("Authorization") String authHeader) {
         try {
@@ -105,9 +91,8 @@ public class RoomController {
         }
         try {
             String token = authHeader.substring(7);
-            String response = roomService.joinRoom(roomId, lobbyJoinDto, token);
-            messagingTemplate.convertAndSend("/topic/room/" + roomId, response);
-            return ResponseEntity.ok("{\"id\":\"" + response + "\"}");
+            Room room = roomService.joinRoom(roomId, lobbyJoinDto, token);
+            return ResponseEntity.ok("{\"id\":\"" + room.getId().toString() + "\"}");
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body("{\"error\":\"" + ex.getMessage().replace("\"", "\\\"") + "\"}");
         }

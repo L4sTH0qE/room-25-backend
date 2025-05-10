@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.hse.room_25.backend.dto.LobbyCreateDto;
 import se.hse.room_25.backend.dto.LobbyJoinDto;
+import se.hse.room_25.backend.dto.RoomDto;
 import se.hse.room_25.backend.entity.Client;
 import se.hse.room_25.backend.entity.Room;
+import se.hse.room_25.backend.model.Cell;
 import se.hse.room_25.backend.model.Game;
 import se.hse.room_25.backend.model.Player;
 import se.hse.room_25.backend.model.PlayerCharacter;
@@ -122,24 +124,24 @@ public class RoomService {
         }.getType();
         Client client = new Gson().fromJson(clientJson, clientType);
 
-        Player player = new Player(client.getId(), PlayerCharacter.fromString(lobbyCreateDto.character()));
+        Player player = new Player(client.getId(), client.getUsername(), PlayerCharacter.fromString(lobbyCreateDto.character()));
         List<Player> players = new ArrayList<>();
         players.add(player);
         String playersJson = new Gson().toJson(players);
 
-        Game game = new Game(this);
+        Game game = new Game(this, lobbyCreateDto.gameMode(), lobbyCreateDto.difficulty());
         String board = new Gson().toJson(game.getBoard());
         UUID roomId = UUID.randomUUID();
         roomIdToGame.put(roomId, game);
 
-        Room room = new Room(lobbyCreateDto.numberOfPlayers(), playersJson, board, 10, 1, 1, -1);
+        Room room = new Room(lobbyCreateDto.numberOfPlayers(), playersJson, board, 12 - lobbyCreateDto.numberOfPlayers(), 1, 1, 0);
         room.setId(roomId);
         roomRepository.save(room);
 
         return roomId.toString();
     }
 
-    public synchronized String joinRoom(UUID roomId, LobbyJoinDto lobbyJoinDto, String token) throws Exception {
+    public synchronized Room joinRoom(UUID roomId, LobbyJoinDto lobbyJoinDto, String token) throws Exception {
         List<String> characters = getAllCharacters();
         if (!characters.contains(lobbyJoinDto.character())) {
             throw new Exception("персонаж \"" + lobbyJoinDto.character() + "\" не доступен");
@@ -166,13 +168,34 @@ public class RoomService {
                 throw new Exception("вы уже присоединились к комнате \"" + roomId + "\"");
             }
         }
-        Player newPlayer = new Player(client.getId(), PlayerCharacter.fromString(lobbyJoinDto.character()));
+        Player newPlayer = new Player(client.getId(), client.getUsername(), PlayerCharacter.fromString(lobbyJoinDto.character()));
         players.add(newPlayer);
         room.setPlayers(new Gson().toJson(players));
         if (players.size() == room.getNumberOfPlayers()) {
             room.setStatus("started");
         }
         roomRepository.save(room);
-        return roomId.toString();
+        return room;
+    }
+
+    public RoomDto roomToDto(Room entity) {
+
+        Gson gson = new Gson();
+        RoomDto dto = new RoomDto();
+        dto.setId(entity.getId().toString());
+        dto.setNumberOfPlayers(entity.getNumberOfPlayers());
+        dto.setTotalTurns(entity.getTotalTurns());
+        dto.setCurrentTurn(entity.getCurrentTurn());
+        dto.setCurrentPhase(entity.getCurrentPhase());
+        dto.setCurrentPlayer(entity.getCurrentPlayer());
+        dto.setStatus(entity.getStatus());
+
+        Type playerListType = new TypeToken<List<Player>>(){}.getType();
+        dto.setPlayers(gson.fromJson(entity.getPlayers(), playerListType));
+
+        Type boardType = new TypeToken<Cell[][]>(){}.getType();
+        dto.setBoard(gson.fromJson(entity.getBoard(), boardType));
+
+        return dto;
     }
 }

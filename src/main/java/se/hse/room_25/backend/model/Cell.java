@@ -1,9 +1,12 @@
 package se.hse.room_25.backend.model;
 
+import lombok.Data;
+
+@Data
 public class Cell {
 
-    CellType type;
-    boolean isFaceUp;
+    private CellType type;
+    private boolean isFaceUp;
 
     public Cell(CellType type) {
         this.type = type;

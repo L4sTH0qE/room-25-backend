@@ -21,7 +21,7 @@ public class JwtInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        log.warn("WEBSOCKET INTERCEPTOR");
+        log.warn("Websocket interceptor started");
         // Только обрабатываем STOMP CONNECT
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         if ("CONNECT".equals(Objects.requireNonNull(accessor.getCommand()).name())) {
@@ -38,6 +38,7 @@ public class JwtInterceptor implements ChannelInterceptor {
                 throw new IllegalArgumentException("Missing or invalid Authorization header in WebSocket CONNECT");
             }
         }
+        log.warn("Websocket interceptor finished");
         return message;
     }
 }
