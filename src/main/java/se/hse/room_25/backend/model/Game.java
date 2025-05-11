@@ -74,7 +74,9 @@ public class Game {
 
         SecureRandom secureRandom = new SecureRandom();
         board = new Cell[5][5];
-        board[2][2] = new Cell(CellType.CENTRAL_ROOM);
+        Cell centralCell = new Cell(CellType.CENTRAL_ROOM);
+        centralCell.turnOver();
+        board[2][2] = centralCell;
 
         int delta = Objects.equals(difficulty, "EASY") ? 2 : 1;
 
