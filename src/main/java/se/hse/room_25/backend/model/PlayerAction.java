@@ -7,14 +7,15 @@ public class PlayerAction {
 
     private PlayerActionType firstAction;
     private PlayerActionType secondAction;
-    private PlayerActionType thirdAction;
+    private boolean isReady;
 
     public PlayerAction() {
+        isReady = false;
     }
 
-    public void programActions(PlayerActionType firstAction, PlayerActionType secondAction, PlayerActionType thirdAction) {
+    public void programActions(PlayerActionType firstAction, PlayerActionType secondAction) {
         this.firstAction = firstAction;
         this.secondAction = secondAction;
-        this.thirdAction = thirdAction;
+        isReady = true;
     }
 }

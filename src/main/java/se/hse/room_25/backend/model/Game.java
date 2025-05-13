@@ -1,7 +1,6 @@
 package se.hse.room_25.backend.model;
 
 import lombok.Getter;
-import se.hse.room_25.backend.service.RoomService;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -11,14 +10,10 @@ import java.util.Objects;
 @Getter
 public class Game {
 
-    // internal attributes - not sent over websocket
-    private RoomService roomService;
-
     // game state attributes - sent over websocket
     private Cell[][] board;
 
-    public Game(RoomService roomService, String gameMode, String difficulty) {
-        this.roomService = roomService;
+    public Game(String gameMode, String difficulty) {
         initialiseBoard(gameMode, difficulty);
     }
 

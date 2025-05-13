@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.hse.room_25.backend.dto.LobbyCreateDto;
 import se.hse.room_25.backend.dto.LobbyJoinDto;
+import se.hse.room_25.backend.dto.PlayerActionsDto;
 import se.hse.room_25.backend.dto.RoomDto;
 import se.hse.room_25.backend.entity.Client;
 import se.hse.room_25.backend.entity.Room;
-import se.hse.room_25.backend.model.Cell;
-import se.hse.room_25.backend.model.Game;
-import se.hse.room_25.backend.model.Player;
-import se.hse.room_25.backend.model.PlayerCharacter;
+import se.hse.room_25.backend.model.*;
 import se.hse.room_25.backend.repository.RoomRepository;
 
 import java.lang.reflect.Type;
@@ -129,12 +127,15 @@ public class RoomService {
         players.add(player);
         String playersJson = new Gson().toJson(players);
 
-        Game game = new Game(this, lobbyCreateDto.gameMode(), lobbyCreateDto.difficulty());
+        Game game = new Game(lobbyCreateDto.gameMode(), lobbyCreateDto.difficulty());
         String board = new Gson().toJson(game.getBoard());
         UUID roomId = UUID.randomUUID();
         roomIdToGame.put(roomId, game);
 
-        Room room = new Room(lobbyCreateDto.numberOfPlayers(), playersJson, board, 12 - lobbyCreateDto.numberOfPlayers(), 1, 1, 0);
+        ControlData controlData = new ControlData(0, ControlOrientation.NONE);
+        String control = new Gson().toJson(controlData);
+
+        Room room = new Room(lobbyCreateDto.numberOfPlayers(), playersJson, board, 12 - lobbyCreateDto.numberOfPlayers(), 1, 1, 0, control);
         room.setId(roomId);
         roomRepository.save(room);
 
@@ -179,7 +180,6 @@ public class RoomService {
     }
 
     public RoomDto roomToDto(Room entity) {
-
         Gson gson = new Gson();
         RoomDto dto = new RoomDto();
         dto.setId(entity.getId().toString());
@@ -190,12 +190,81 @@ public class RoomService {
         dto.setCurrentPlayer(entity.getCurrentPlayer());
         dto.setStatus(entity.getStatus());
 
-        Type playerListType = new TypeToken<List<Player>>(){}.getType();
+        Type playerListType = new TypeToken<List<Player>>() {
+        }.getType();
         dto.setPlayers(gson.fromJson(entity.getPlayers(), playerListType));
 
-        Type boardType = new TypeToken<Cell[][]>(){}.getType();
+        Type boardType = new TypeToken<Cell[][]>() {
+        }.getType();
         dto.setBoard(gson.fromJson(entity.getBoard(), boardType));
 
+        Type controlDataType = new TypeToken<ControlData>() {
+        }.getType();
+        dto.setControlData(gson.fromJson(entity.getControlData(), controlDataType));
+
         return dto;
+    }
+
+    public Room updatePlayerActions(UUID roomId, PlayerActionsDto playerActionsDto) throws Exception {
+        Room room = getRoom(roomId);
+        String playersJson = room.getPlayers();
+        Type playerListType = new TypeToken<List<Player>>() {
+        }.getType();
+        List<Player> players = new Gson().fromJson(playersJson, playerListType);
+
+        for (Player player : players) {
+            if (player.getClientName().equals(playerActionsDto.player)) {
+                player.getPlayerAction().programActions(PlayerActionType.fromTitle(playerActionsDto.getActions().getFirst()), PlayerActionType.fromTitle(playerActionsDto.getActions().get(1)));
+                break;
+            }
+        }
+        room.setPlayers(new Gson().toJson(players));
+
+        for (Player player : players) {
+            if (!player.getPlayerAction().isReady()) {
+                roomRepository.save(room);
+                return room;
+            }
+        }
+
+        if (players.size() == room.getNumberOfPlayers()) {
+            room.setCurrentPhase(2);
+        }
+        roomRepository.save(room);
+        return room;
+    }
+
+    public Room updateGameStatus(UUID roomId, RoomDto roomDto) throws Exception {
+
+        Room room = getRoom(roomId);
+
+        room.setPlayers(new Gson().toJson(roomDto.getPlayers()));
+        room.setBoard(new Gson().toJson(roomDto.getBoard()));
+        room.setControlData(new Gson().toJson(roomDto.getControlData()));
+        room.setStatus(roomDto.getStatus());
+
+        int currentTurn = room.getCurrentTurn();
+        int currentPhase = roomDto.getCurrentPhase();
+        int currentPlayer = roomDto.getCurrentPlayer();
+        currentPlayer++;
+        if (currentPlayer >= roomDto.getNumberOfPlayers()) {
+            currentPlayer %= roomDto.getNumberOfPlayers();
+            currentPhase++;
+            if (currentPhase > 3) {
+                currentPhase = 1;
+                currentTurn++;
+                if (currentTurn > roomDto.getTotalTurns()) {
+                    if (!Objects.equals(roomDto.getStatus(), "won")) {
+                        room.setStatus("lost");
+                    }
+                }
+            }
+        }
+        room.setCurrentTurn(currentTurn);
+        room.setCurrentPhase(currentPhase);
+        room.setCurrentPlayer(currentPlayer);
+
+        roomRepository.save(room);
+        return room;
     }
 }

@@ -26,6 +26,9 @@ public class Room {
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String board;
 
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    String controlData;
+
     int totalTurns;
 
     int currentTurn;
@@ -36,10 +39,12 @@ public class Room {
 
     String status = "waiting";
 
+    boolean keyFound = false;
+
     public Room() {
     }
 
-    public Room(int numberOfPlayers, String players, String board, int totalTurns, int currentTurn, int currentPhase, int currentPlayer) {
+    public Room(int numberOfPlayers, String players, String board, int totalTurns, int currentTurn, int currentPhase, int currentPlayer, String controlData) {
         this.numberOfPlayers = numberOfPlayers;
         this.players = players;
         this.board = board;
@@ -47,6 +52,7 @@ public class Room {
         this.currentTurn = currentTurn;
         this.currentPhase = currentPhase;
         this.currentPlayer = currentPlayer;
+        this.controlData = controlData;
     }
 
     @PrePersist

@@ -6,14 +6,14 @@ import lombok.Data;
 public class Cell {
 
     private CellType type;
-    private boolean isFaceUp;
+    private boolean faceUp;
 
     public Cell(CellType type) {
         this.type = type;
-        isFaceUp = false;
+        faceUp = false;
     }
 
     public void turnOver() {
-        isFaceUp = !isFaceUp;
+        faceUp = !faceUp;
     }
 }
