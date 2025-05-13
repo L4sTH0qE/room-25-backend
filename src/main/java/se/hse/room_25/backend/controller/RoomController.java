@@ -84,7 +84,7 @@ public class RoomController {
     }
 
     @PostMapping("/join/{roomId}")
-    public ResponseEntity<String> joinRoomByToken(@PathVariable UUID roomId, @RequestHeader("Authorization") String authHeader, @RequestBody LobbyJoinDto lobbyJoinDto, BindingResult result) {
+    public ResponseEntity<String> joinRoom(@PathVariable UUID roomId, @RequestHeader("Authorization") String authHeader, @RequestBody LobbyJoinDto lobbyJoinDto, BindingResult result) {
 
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("{\"error\":\"неверные игровые данные\"}");
