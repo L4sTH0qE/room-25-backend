@@ -251,6 +251,8 @@ public class RoomService {
             currentPlayer %= roomDto.getNumberOfPlayers();
             currentPhase++;
             if (currentPhase > 3) {
+                ControlData controlData = new ControlData(0, ControlOrientation.NONE);
+                room.setControlData(new Gson().toJson(controlData));
                 currentPhase = 1;
                 currentTurn++;
                 if (currentTurn > roomDto.getTotalTurns()) {
