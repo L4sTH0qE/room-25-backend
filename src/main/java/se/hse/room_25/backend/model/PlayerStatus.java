@@ -4,7 +4,8 @@ public enum PlayerStatus {
     NORMAL,
     BLIND,
     FROZEN,
-    FLOODED,
+    FLOODED_FIRST,
+    FLOODED_SECOND,
     IMPRISONED,
     TRAPPED,
     DEAD

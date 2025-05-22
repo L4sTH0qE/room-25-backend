@@ -253,6 +253,16 @@ public class RoomService {
             if (currentPhase > 3) {
                 ControlData controlData = new ControlData(0, ControlOrientation.NONE);
                 room.setControlData(new Gson().toJson(controlData));
+                List<Player> players = roomDto.getPlayers();
+                for (Player player: players) {
+                    if (player.getStatus() == PlayerStatus.FLOODED_FIRST) {
+                        player.setStatus(PlayerStatus.FLOODED_SECOND);
+                    } else if (player.getStatus() == PlayerStatus.FLOODED_SECOND) {
+                        player.setStatus(PlayerStatus.DEAD);
+                        room.setStatus("lost");
+                    }
+                }
+                room.setPlayers(new Gson().toJson(players));
                 currentPhase = 1;
                 currentTurn++;
                 if (currentTurn > roomDto.getTotalTurns()) {
