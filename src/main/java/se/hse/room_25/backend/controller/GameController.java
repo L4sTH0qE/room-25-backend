@@ -65,4 +65,14 @@ public class GameController {
             log.error(ex.getMessage());
         }
     }
+
+    @MessageMapping("/room/{roomId}/push-event")
+    public void handlePushEffect(@DestinationVariable UUID roomId, @Payload String jsonRoomDto) {
+        try {
+            RoomDto roomDto = new Gson().fromJson(jsonRoomDto, RoomDto.class);
+            messagingTemplate.convertAndSend("/topic/room/" + roomId + "/push-effect", roomDto);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+    }
 }

@@ -20,4 +20,5 @@ public class RoomDto {
     private String status;
     private ControlData controlData;
     private boolean keyFound;
+    private String waitingEffect;
 }

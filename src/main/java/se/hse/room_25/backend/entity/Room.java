@@ -41,6 +41,8 @@ public class Room {
 
     boolean keyFound = false;
 
+    String waitingEffect = "";
+
     public Room() {
     }
 
