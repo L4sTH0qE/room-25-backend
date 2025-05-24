@@ -189,6 +189,8 @@ public class RoomService {
         dto.setCurrentPhase(entity.getCurrentPhase());
         dto.setCurrentPlayer(entity.getCurrentPlayer());
         dto.setStatus(entity.getStatus());
+        dto.setWaitingEffect(entity.getWaitingEffect());
+        dto.setKeyFound(entity.isKeyFound());
 
         Type playerListType = new TypeToken<List<Player>>() {
         }.getType();
@@ -242,6 +244,8 @@ public class RoomService {
         room.setBoard(new Gson().toJson(roomDto.getBoard()));
         room.setControlData(new Gson().toJson(roomDto.getControlData()));
         room.setStatus(roomDto.getStatus());
+        room.setKeyFound(roomDto.isKeyFound());
+        room.setWaitingEffect(roomDto.getWaitingEffect());
 
         int currentTurn = room.getCurrentTurn();
         int currentPhase = roomDto.getCurrentPhase();
@@ -275,7 +279,19 @@ public class RoomService {
         room.setCurrentTurn(currentTurn);
         room.setCurrentPhase(currentPhase);
         room.setCurrentPlayer(currentPlayer);
+        roomRepository.save(room);
+        return room;
+    }
 
+    public Room save(UUID roomId, RoomDto roomDto) throws Exception {
+
+        Room room = getRoom(roomId);
+
+        room.setPlayers(new Gson().toJson(roomDto.getPlayers()));
+        room.setBoard(new Gson().toJson(roomDto.getBoard()));
+        room.setControlData(new Gson().toJson(roomDto.getControlData()));
+        room.setStatus(roomDto.getStatus());
+        room.setWaitingEffect(roomDto.getWaitingEffect());
         roomRepository.save(room);
         return room;
     }

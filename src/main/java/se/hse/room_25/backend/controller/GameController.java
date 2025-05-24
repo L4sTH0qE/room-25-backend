@@ -70,7 +70,9 @@ public class GameController {
     public void handlePushEffect(@DestinationVariable UUID roomId, @Payload String jsonRoomDto) {
         try {
             RoomDto roomDto = new Gson().fromJson(jsonRoomDto, RoomDto.class);
-            messagingTemplate.convertAndSend("/topic/room/" + roomId + "/push-effect", roomDto);
+            Room room = roomService.save(roomId, roomDto);
+            RoomDto dto = roomService.roomToDto(room);
+            messagingTemplate.convertAndSend("/topic/room/" + roomId + "/push-effect", dto);
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
