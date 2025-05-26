@@ -2,6 +2,7 @@ package se.hse.room_25.backend.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import se.hse.room_25.backend.service.JwtService;
 
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +28,9 @@ import java.util.List;
 public class SecurityConfiguration {
 
     JwtService jwtService;
+
+    @Value("${client.url}")
+    private String clientUrl;
 
     @Autowired
     public void prepare(JwtService jwtService) {
@@ -68,7 +73,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("client.url"));
+        configuration.setAllowedOrigins(List.of(clientUrl));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
